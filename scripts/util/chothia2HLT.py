@@ -195,15 +195,15 @@ def convert_to_hlt(
                         # Convert to absolute residue number and store
                         cdr_residues[cdr].append(residue_counter)
 
-                # Assign the residue a new residue number
-                residue.res_id = np.full(len(residue), residue_counter)
+                    # Assign the residue a new residue number
+                    residue.res_id = np.full(len(residue), residue_counter)
 
-                # Remove insertion codes
-                residue.ins_code = np.full(len(residue), '')
+                    # Remove insertion codes
+                    residue.ins_code = np.full(len(residue), '')
 
-                atom_list += residue
+                    atom_list += residue
 
-                residue_counter += 1
+                    residue_counter += 1
 
     return array(atom_list), cdr_residues
 
@@ -217,11 +217,11 @@ def main():
     target_chains = args.target.split(',') if args.target else []
 
     # Generate output path if not specified
-    output_path = args.output or args.input_pdb.replace('.pdb', '_HLT.pdb')
+    output_path = args.output or args.inpdb.replace('.pdb', '_HLT.pdb')
 
     # Convert structure to HLT format
     hlt_structure, cdr_residues = convert_to_hlt(
-        args.input_pdb,
+        args.inpdb,
         args.heavy,
         args.light,
         target_chains,
