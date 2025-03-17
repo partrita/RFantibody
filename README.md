@@ -1,5 +1,13 @@
 # RFantibody
-### Structure-Based _de novo_ Antibody Design
+
+Todo list
+
+- [x] Fix minor typo of example code to working.
+- [ ] Change package manager `poetry` to `uv`.
+- [ ] Refactoring the code.
+- [ ] Deploy dockerfile from github action.
+
+## Structure-Based _de novo_ Antibody Design
 
 ![banner](https://www.bakerlab.org/wp-content/uploads/2025/02/RFdiffusion-antibody-bound-to-Cdiff-ToxinB-BY-Ian-C-Haydon-University-of-Washington-1024x576.jpg)
 
@@ -160,7 +168,7 @@ The first step in RFantibody is to generate antibody-target docks using an antib
 # From inside of the rfantibody container
 
 poetry run python  /home/rfantibody/scripts/rfdiffusion_inference.py \
-  --config-path /home/rfantibody/src/rfantibody/rfdiffusion/config/inference \
+  --config-path src/rfantibody/rfdiffusion/config/inference \
   --config-name antibody \
   antibody.target_pdb=/home/scripts/examples/example_inputs/rsv_site3.pdb \
   antibody.framework_pdb=/home/scripts/examples/example_inputs/hu-4D5-8_Fv.pdb \
