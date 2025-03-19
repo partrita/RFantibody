@@ -3,9 +3,9 @@
 Todo list
 
 - [x] Fix minor typo of example code to working.
-- [ ] Nanobody RF2에서 오류남. CDR 안맞다고.
+- [ ] Bash script reorganize to single file.
 - [ ] Change package manager `poetry` to `uv`.
-- [ ] Refactoring the code.
+- [x] Refactoring the code.
 - [ ] Deploy dockerfile from github action.
 
 ## Structure-Based _de novo_ Antibody Design
