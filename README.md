@@ -3,6 +3,7 @@
 Todo list
 
 - [x] Fix minor typo of example code to working.
+- [ ] Nanobody RF2에서 오류남. CDR 안맞다고.
 - [ ] Change package manager `poetry` to `uv`.
 - [ ] Refactoring the code.
 - [ ] Deploy dockerfile from github action.
@@ -145,12 +146,19 @@ To enable the passing of this information between steps of the pipeline, we defi
 ## Input Preparation
 
 The antibody-finetuned version of RFdiffusion in RFantibody requires an HLT-remarked framework structure as input. We provide a script to perform this conversion that can be run as follows:
+
+```bash
+# From inside of the rfantibody container
+poetry run python /home/scripts/util/chothia2HLT.py  \
+    -i /home/scripts/examples/rfdiffusion/example_inputs/8tlm_chothia.pdb \
+    -o /home/scripts/examples/rfdiffusion/example_inputs/8tlm \
+    -H A -L B -T C
+```
+
 ```bash
 # From inside of the rfantibody container
 
-poetry run python /home/scripts/util/chothia2HLT.py \
-  -i /home/scripts/examples/example_inputs/8tlm_chothia.pdb \
-  -o 8tlm_HLT.pdb -H A -L B -T C
+bash /home/scripts/examples/generate_HLT_8tlm.sh
 ```
 
 This script expects a Chothia annotated .pdb file. A great source for these files is [SabDab](https://opig.stats.ox.ac.uk/webapps/sabdab-sabpred/sabdab), which provides Chothia annotated structures of all antibodies and nanobodies in the PDB and is updated every few months.
@@ -332,7 +340,7 @@ qvsplit my.qv 100
 ## Reading and Writing Quiver Files
 All steps of RFantibody allow for the use of Quiver files. The syntax is summarized here:
 
-RFdiffusion takes only a .pdb file target and framework as input. To output the designed backbones at quiver files append this argument to your input command:
+RFdiffusion takes only a `.pdb` file target and framework as input. To output the designed backbones at quiver files append this argument to your input command:
 
 ```bash
 inference.quiver=/path/to/myoutput.qv
@@ -356,4 +364,4 @@ We are really excited to release RFantibody open-source! We can't wait to see wh
 
 ---
 
-RFantibody builds directly off of the architecture and weights of several methods which we acknowledge here. We thank Minkyung Baek and Frank DiMaio for developing RoseTTAFold and RoseTTAFold2 which the original RFdiffusion and our antibody-fine tuned RoseTTAFold2 model are based off of. We thank Justas Dauparas for developing ProteinMPNN which we provide an antibody-specific wrapper for in this repo. As the antibody-finetuned RFdiffusion we provide here is directly based off of the original version of RFdiffusion, we also thank David Juergens, Brian Trippe, and Jason Yim who co-developed the original RFdiffusion with us. RFantibody is released under an MIT License (see LICENSE file). It is free for both non-profit and for-profit use.
+RFantibody builds directly off of the architecture and weights of several methods which we acknowledge here. We thank Minkyung Baek and Frank DiMaio for developing RoseTTAFold and RoseTTAFold2 which the original RFdiffusion and our antibody-fine tuned RoseTTAFold2 model are based off of. We thank Justas Dauparas for developing ProteinMPNN which we provide an antibody-specific wrapper for in this repo. As the antibody-finetuned RFdiffusion we provide here is directly based off of the original version of RFdiffusion, we also thank David Juergens, Brian Trippe, and Jason Yim who co-developed the original RFdiffusion with us. RFantibody is released under an MIT License (see LICENSE file). It is free for both non-profit and for-profit us

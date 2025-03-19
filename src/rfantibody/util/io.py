@@ -6,6 +6,7 @@ from typing import List, Optional
 
 from rfantibody.rfdiffusion.chemical import aa2long, aa2num
 
+
 def stamp_pdbline(
     prefix: str,
     ctr: int,
@@ -19,7 +20,7 @@ def stamp_pdbline(
     occupancy: float,
     b_factor: float,
 ) -> str:
-    return "%-6s%5s %4s %3s %s%4d    %8.3f%8.3f%8.3f%6.2f%6.2f\n"%(
+    return "%-6s%5s %4s %3s %s%4d    %8.3f%8.3f%8.3f%6.2f%6.2f\n" % (
         prefix,
         ctr,
         atom_name,
@@ -73,8 +74,8 @@ def ab_write_pdblines(
 
     Bfacts = np.clip(
         bfacts,
-        a_min = 0,
-        a_max = 1,
+        a_min=0,
+        a_max=1,
     )
 
     pdblines = []
@@ -82,8 +83,7 @@ def ab_write_pdblines(
         chain = chain_idx[i]
 
         # If the input is a single set of atomic coordinates, assume it is a C-alpha trace
-        if (len(atoms.shape)==2):
-            
+        if len(atoms.shape) == 2:
             pdblines.append(
                 stamp_pdbline(
                     prefix="ATOM",
@@ -92,9 +92,9 @@ def ab_write_pdblines(
                     residue_name=num2aa[seq[i]],
                     chain=chain,
                     residue_idx=idx_pdb[i],
-                    x_coord=atoms[i,0],
-                    y_coord=atoms[i,1],
-                    z_coord=atoms[i,2],
+                    x_coord=atoms[i, 0],
+                    y_coord=atoms[i, 1],
+                    z_coord=atoms[i, 2],
                     occupancy=1.0,
                     b_factor=Bfacts[i],
                 )
@@ -104,9 +104,8 @@ def ab_write_pdblines(
 
         # If the input is a set of atomic coordinates with 3 atoms per residue,
         # assume it is a backbone trace
-        elif atoms.shape[1]==3:
-            for j,atm_j in enumerate([" N  "," CA "," C  "]):
-                
+        elif atoms.shape[1] == 3:
+            for j, atm_j in enumerate([" N  ", " CA ", " C  "]):
                 pdblines.append(
                     stamp_pdbline(
                         prefix="ATOM",
@@ -115,9 +114,9 @@ def ab_write_pdblines(
                         residue_name=num2aa[seq[i]],
                         chain=chain,
                         residue_idx=idx_pdb[i],
-                        x_coord=atoms[i,j,0],
-                        y_coord=atoms[i,j,1],
-                        z_coord=atoms[i,j,2],
+                        x_coord=atoms[i, j, 0],
+                        y_coord=atoms[i, j, 1],
+                        z_coord=atoms[i, j, 2],
                         occupancy=1.0,
                         b_factor=Bfacts[i],
                     )
@@ -127,9 +126,8 @@ def ab_write_pdblines(
 
         # If the input is a set of atomic coordinates with 4 atoms per residue,
         # assume it is a backbone trace with an oxygen atom
-        elif atoms.shape[1]==4:
-            for j,atm_j in enumerate([" N  "," CA "," C  "," O  "]):
-
+        elif atoms.shape[1] == 4:
+            for j, atm_j in enumerate([" N  ", " CA ", " C  ", " O  "]):
                 pdblines.append(
                     stamp_pdbline(
                         prefix="ATOM",
@@ -138,33 +136,63 @@ def ab_write_pdblines(
                         residue_name=num2aa[seq[i]],
                         chain=chain,
                         residue_idx=idx_pdb[i],
-                        x_coord=atoms[i,j,0],
-                        y_coord=atoms[i,j,1],
-                        z_coord=atoms[i,j,2],
+                        x_coord=atoms[i, j, 0],
+                        y_coord=atoms[i, j, 1],
+                        z_coord=atoms[i, j, 2],
                         occupancy=1.0,
                         b_factor=Bfacts[i],
                     )
                 )
-                
+
                 ctr += 1
-            
+
         # Otherwise, assume the input is a full atomic tensor with either 14 or 27 atoms per residue
         else:
             natoms = atoms.shape[1]
 
-            assert(natoms==14 or natoms==27), "Invalid number of atoms per residue, must be 14 or 27"
+            assert natoms == 14 or natoms == 27, (
+                "Invalid number of atoms per residue, must be 14 or 27"
+            )
 
             atms = aa2long[aa2num[seq[i]]]
 
             # his prot hack
-            if (aa2num[seq[i]]==8 and torch.linalg.norm( atoms[i,9,:]-atoms[i,5,:] ) < 1.7):
+            if (
+                aa2num[seq[i]] == 8
+                and torch.linalg.norm(atoms[i, 9, :] - atoms[i, 5, :]) < 1.7
+            ):
                 atms = (
-                    " N  "," CA "," C  "," O  "," CB "," CG "," NE2"," CD2"," CE1"," ND1",
-                      None,  None,  None,  None," H  "," HA ","1HB ","2HB "," HD2"," HE1",
-                    " HD1",  None,  None,  None,  None,  None,  None) # his_d
+                    " N  ",
+                    " CA ",
+                    " C  ",
+                    " O  ",
+                    " CB ",
+                    " CG ",
+                    " NE2",
+                    " CD2",
+                    " CE1",
+                    " ND1",
+                    None,
+                    None,
+                    None,
+                    None,
+                    " H  ",
+                    " HA ",
+                    "1HB ",
+                    "2HB ",
+                    " HD2",
+                    " HE1",
+                    " HD1",
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                )  # his_d
 
-            for j,atm_j in enumerate(atms):
-                if (j<natoms and atm_j is not None):
+            for j, atm_j in enumerate(atms):
+                if j < natoms and atm_j is not None:
                     pdblines.append(
                         stamp_pdbline(
                             prefix="ATOM",
@@ -173,15 +201,14 @@ def ab_write_pdblines(
                             residue_name=seq[i],
                             chain=chain,
                             residue_idx=idx_pdb[i],
-                            x_coord=atoms[i,j,0],
-                            y_coord=atoms[i,j,1],
-                            z_coord=atoms[i,j,2],
+                            x_coord=atoms[i, j, 0],
+                            y_coord=atoms[i, j, 1],
+                            z_coord=atoms[i, j, 2],
                             occupancy=1.0,
                             b_factor=Bfacts[i],
                         )
                     )
                     ctr += 1
-
 
     # This may or may not be necessary between the coordinates and the REMARKS
     pdblines.append("TER\n")
@@ -190,15 +217,13 @@ def ab_write_pdblines(
     # NB: could also add in the hotspots labels as remarks here as well
     for loop in loop_map:
         for resi in loop_map[loop]:
-            pdblines.append("REMARK PDBinfo-LABEL:%5s %s\n"%(resi, loop))
+            pdblines.append("REMARK PDBinfo-LABEL:%5s %s\n" % (resi, loop))
 
     return pdblines
-    
 
-def parse_HLT_lines(
-    lines: List[str]
-) -> dict:
-    '''
+
+def parse_HLT_lines(lines: List[str]) -> dict:
+    """
     Args:
         lines:
             A list of lines from a PDB file
@@ -217,22 +242,29 @@ def parse_HLT_lines(
             pdb_idx:
                 np.ndarray, [L] tensor of pdb indices
             loop_masks:
-                dict[str, np.ndarray], dictionary of loop masks 
-    '''
+                dict[str, np.ndarray], dictionary of loop masks
+    """
 
-    cdr_names = ['H1','H2','H3','L1','L2','L3']
+    cdr_names = ["H1", "H2", "H3", "L1", "L2", "L3"]
 
     # indices of residues observed in the structure
     res = []
     for l in lines:
-        if l[:4]!="ATOM": continue
+        if l[:4] != "ATOM":
+            continue
 
-        i = 0 if l[11] == ' ' else 1
-        if l[12+i:16+i].strip()=="CA":
-            res.append((l[22+i:26+i].strip(),l[17+i:20+1].strip(),l[21+i]))
+        i = 0 if l[11] == " " else 1
+        if l[12 + i : 16 + i].strip() == "CA":
+            res.append(
+                (l[22 + i : 26 + i].strip(), l[17 + i : 20 + 1].strip(), l[21 + i])
+            )
 
     seq = [aa2num[r[1]] if r[1] in aa2num.keys() else 20 for r in res]
-    pdb_idx = [(l[21:22].strip(), l[22:26].strip()) for l in lines if l[:4]=="ATOM" and l[12:16].strip()=="CA"]  # chain letter, res num
+    pdb_idx = [
+        (l[21:22].strip(), l[22:26].strip())
+        for l in lines
+        if l[:4] == "ATOM" and l[12:16].strip() == "CA"
+    ]  # chain letter, res num
 
     loop_masks = {loop: np.zeros(len(res)).astype(bool) for loop in cdr_names}
 
@@ -240,35 +272,45 @@ def parse_HLT_lines(
     xyz = np.full((len(res), 27, 3), np.nan, dtype=np.float32)
     for l in lines:
         # Check for lines that begin with REMARK and parse them to their loop labels
-        if l[:3] == 'TER': continue
+        if l[:3] == "TER":
+            continue
         if l[:6] == "REMARK":
-            loop = l[27:29].upper() 
-            if loop in cdr_names: 
-                resi = int(l[21:26]) - 1 # Loop residues in HLT are 1-indexed
+            loop = l[27:29].upper()
+            if loop in cdr_names:
+                resi = int(l[21:26]) - 1  # Loop residues in HLT are 1-indexed
                 loop_masks[loop][resi] = True
             continue
         if l[:4] != "ATOM":
             continue
-        chain, resNo, atom, aa = l[21:22].strip(), l[22:26].strip(), ' '+l[12:16].strip().ljust(3), l[17:20]
-        if (chain,resNo) not in pdb_idx:
+        chain, resNo, atom, aa = (
+            l[21:22].strip(),
+            l[22:26].strip(),
+            " " + l[12:16].strip().ljust(3),
+            l[17:20],
+        )
+        if (chain, resNo) not in pdb_idx:
             continue
-        idx = pdb_idx.index((chain,resNo))
+        idx = pdb_idx.index((chain, resNo))
         for i_atm, tgtatm in enumerate(aa2long[aa2num[aa]]):
-            if tgtatm is not None and tgtatm.strip() == atom.strip(): # ignore whitespace
-                xyz[idx,i_atm,:] = [float(l[30:38]), float(l[38:46]), float(l[46:54])]
+            if (
+                tgtatm is not None and tgtatm.strip() == atom.strip()
+            ):  # ignore whitespace
+                xyz[idx, i_atm, :] = [float(l[30:38]), float(l[38:46]), float(l[46:54])]
                 break
 
     # save atom mask
-    mask = np.logical_not(np.isnan(xyz[...,0]))
-    xyz[np.isnan(xyz[...,0])] = 0.0
+    mask = np.logical_not(np.isnan(xyz[..., 0]))
+    xyz[np.isnan(xyz[..., 0])] = 0.0
 
     out = {
-        'xyz':xyz, # cartesian coordinates, [Lx14]
-        'mask':mask, # mask showing which atoms are present in the PDB file, [Lx14]
-        'idx':np.array([i[1] for i in pdb_idx]), # residue numbers in the PDB file, [L]
-        'seq':np.array(seq), # amino acid sequence, [L]
-        'pdb_idx': pdb_idx,  # list of (chain letter, residue number) in the pdb file, [L]
-        'loop_masks' : loop_masks # dict of [L] masks indicating which residue belongs to which loop
+        "xyz": xyz,  # cartesian coordinates, [Lx14]
+        "mask": mask,  # mask showing which atoms are present in the PDB file, [Lx14]
+        "idx": np.array(
+            [i[1] for i in pdb_idx]
+        ),  # residue numbers in the PDB file, [L]
+        "seq": np.array(seq),  # amino acid sequence, [L]
+        "pdb_idx": pdb_idx,  # list of (chain letter, residue number) in the pdb file, [L]
+        "loop_masks": loop_masks,  # dict of [L] masks indicating which residue belongs to which loop
     }
 
     return out

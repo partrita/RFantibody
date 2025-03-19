@@ -16,10 +16,28 @@ from biotite.structure import array
 from biotite.structure import residue_iter
 
 protein_residues = [
-    "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY",
-    "HIS", "ILE", "LEU", "LYS", "MET", "PHE", "PRO", "SER",
-    "THR", "TRP", "TYR", "VAL"
+    "ALA",
+    "ARG",
+    "ASN",
+    "ASP",
+    "CYS",
+    "GLN",
+    "GLU",
+    "GLY",
+    "HIS",
+    "ILE",
+    "LEU",
+    "LYS",
+    "MET",
+    "PHE",
+    "PRO",
+    "SER",
+    "THR",
+    "TRP",
+    "TYR",
+    "VAL",
 ]
+
 
 def parse_args():
     """Parse command line arguments for the script.
@@ -32,24 +50,37 @@ def parse_args():
             - target: Comma-separated list of target chain IDs
             - output: Optional output file path
     """
-    parser = argparse.ArgumentParser(description='Convert Chothia-formatted PDB to HLT format')
-    parser.add_argument('--inpdb', '-i', help='Input PDB file in Chothia format')
-    parser.add_argument('--heavy', '-H', help='Heavy chain ID')
-    parser.add_argument('--light', '-L', help='Light chain ID')
-    parser.add_argument('--target', '-T', help='Target chain ID(s), comma-separated')
-    parser.add_argument('--output', '-o', help='Output HLT file path')
-    parser.add_argument('--whole_fab', '-w', action='store_true', help='Keep entire Fab region')
-    parser.add_argument('--Hcrop', default=115, help='Chothia residue number to crop to for heavy chain a ' + \
-                        'reasonable number is between 105 and 115')
-    parser.add_argument('--Lcrop', default=110, help='Chothia residue number to crop to for light chain a ' + \
-                        'reasonable number is between 100 and 110')
+    parser = argparse.ArgumentParser(
+        description="Convert Chothia-formatted PDB to HLT format"
+    )
+    parser.add_argument("--inpdb", "-i", help="Input PDB file in Chothia format")
+    parser.add_argument("--heavy", "-H", help="Heavy chain ID")
+    parser.add_argument("--light", "-L", help="Light chain ID")
+    parser.add_argument("--target", "-T", help="Target chain ID(s), comma-separated")
+    parser.add_argument("--output", "-o", help="Output HLT file path")
+    parser.add_argument(
+        "--whole_fab", "-w", action="store_true", help="Keep entire Fab region"
+    )
+    parser.add_argument(
+        "--Hcrop",
+        default=115,
+        help="Chothia residue number to crop to for heavy chain a "
+        + "reasonable number is between 105 and 115",
+    )
+    parser.add_argument(
+        "--Lcrop",
+        default=110,
+        help="Chothia residue number to crop to for light chain a "
+        + "reasonable number is between 100 and 110",
+    )
 
     args = parser.parse_args()
 
     if not (args.heavy or args.light):
-        raise ValueError('Either heavy or light chain must be specified')
+        raise ValueError("Either heavy or light chain must be specified")
 
     return args
+
 
 def get_Fv_ranges():
     """Define the residue ranges for each Fv loop according to Chothia numbering scheme.
@@ -58,10 +89,8 @@ def get_Fv_ranges():
         dict: Dictionary mapping Fv names to their residue ranges (start, end) inclusive
     """
 
-    return {
-        'H': (1, 102),
-        'L': (1, 97)
-    }
+    return {"H": (1, 102), "L": (1, 97)}
+
 
 def get_cdr_ranges():
     """Define the residue ranges for each CDR loop according to Chothia numbering scheme.
@@ -73,17 +102,18 @@ def get_cdr_ranges():
         dict: Dictionary mapping CDR names to their residue ranges (start, end) inclusive
     """
     return {
-        'H': {
-            'H1': (26, 32),  # Heavy chain CDR1: residues 26-32
-            'H2': (52, 56),  # Heavy chain CDR2: residues 52-56
-            'H3': (95, 102), # Heavy chain CDR3: residues 95-102
+        "H": {
+            "H1": (26, 32),  # Heavy chain CDR1: residues 26-32
+            "H2": (52, 56),  # Heavy chain CDR2: residues 52-56
+            "H3": (95, 102),  # Heavy chain CDR3: residues 95-102
         },
-        'L': {
-            'L1': (24, 34),  # Light chain CDR1: residues 24-34
-            'L2': (50, 56),  # Light chain CDR2: residues 50-56
-            'L3': (89, 97),  # Light chain CDR3: residues 89-97
+        "L": {
+            "L1": (24, 34),  # Light chain CDR1: residues 24-34
+            "L2": (50, 56),  # Light chain CDR2: residues 50-56
+            "L3": (89, 97),  # Light chain CDR3: residues 89-97
         },
     }
+
 
 def convert_to_hlt(
     input_pdb,
@@ -94,154 +124,102 @@ def convert_to_hlt(
     Hcrop,
     Lcrop,
 ):
-    """Convert a Chothia-formatted PDB file to HLT format.
-
-    Args:
-        input_pdb (str): Path to input PDB file
-        heavy_chain (str): Chain ID for heavy chain in input file
-        light_chain (str): Chain ID for light chain in input file
-        target_chains (list): List of chain IDs for target chains
-        whole_fab (bool): Whether to keep entire Fab region
-        Hcrop (int): Chothia residue number to crop to for heavy chain
-        Lcrop (int): Chothia residue number to crop to for light chain
-
-    Returns:
-        tuple: (biotite.structure.Structure, dict)
-            - Modified structure in HLT format
-            - Dictionary mapping CDR names to lists of residue numbers
-    """
-    # Read input PDB file using biotite
     pdb_file = PDBFile.read(input_pdb)
     structure = pdb_file.get_structure(model=1)
 
-    # Subset the structure to only include protein chains
-    protein_atom_list = []
-    for atom in structure:
-        if atom.res_name in protein_residues:
-            protein_atom_list.append(atom)
-
+    protein_atom_list = [
+        atom for atom in structure if atom.res_name in protein_residues
+    ]
     structure = array(protein_atom_list)
 
-    # Initialize new structure for HLT format
-    atom_list = []
-
-    # Map original chain IDs to new HLT format chain IDs
-    chain_mapping = {
-        heavy_chain: 'H',
-        light_chain: 'L'
-    }
+    chain_mapping = {heavy_chain: "H", light_chain: "L"}
     for t in target_chains:
-        chain_mapping[t] = 'T'
+        chain_mapping[t] = "T"
 
-    # Initialize dictionary to track CDR loop residue numbers
-    # These will be used to generate the REMARK statements
-    cdr_residues = {
-        'H1': [], 'H2': [], 'H3': [],
-        'L1': [], 'L2': [], 'L3': []
-    }
+    cdr_residues = {"H1": [], "H2": [], "H3": [], "L1": [], "L2": [], "L3": []}
 
-    # Process chains in HLT order
-    current_residue = 1  # Track absolute residue numbering (1-indexed)
     cdr_ranges = get_cdr_ranges()
+    hl_structure = []
+    t_structure = []
+    processed_residues = set()
 
-    # Process each chain type in order: H, L, T
-    residue_counter = 1
-
-    for chain_id in ['H', 'L', 'T']:
-        orig_chain = None
-        if chain_id == 'H':
-            orig_chain = heavy_chain
-        elif chain_id == 'L':
-            orig_chain = light_chain
-        else:  # Handle target chains (can be multiple)
-            for t in target_chains:
-                chain_mask = structure.chain_id == t
-                if np.any(chain_mask):
-                    atoms = structure[chain_mask]
-                    # Rename chain to T
-                    atoms.chain_id = np.full(len(atoms), chain_id)
-                    atom_list += atoms
-                    # Update residue counter
-                    # TODO replace this unique with biotite's num residues function
-                    current_residue += len(np.unique(atoms.res_id))
-            continue
-
-        # Get atoms for current chain
-        chain_mask = structure.chain_id == orig_chain
+    for chain_id, new_chain_id in chain_mapping.items():
+        chain_mask = structure.chain_id == chain_id
         if not np.any(chain_mask):
             continue
 
         atoms = structure[chain_mask]
-        # Rename chain to H or L
-        atoms.chain_id = np.full(len(atoms), chain_id)
+        atoms.chain_id = np.full(len(atoms), new_chain_id)
 
-        # Renumber residues to absolute numbering and identify CDR loop residues
-        renumbered_atoms = []
-        if chain_id in cdr_ranges:
-
-            curr_ranges = cdr_ranges[chain_id]
+        if new_chain_id in ["H", "L"]:
+            curr_ranges = cdr_ranges[new_chain_id]
             for residue in residue_iter(atoms):
-                auth_res_num = np.unique(residue.res_id)[0]
+                res_id = residue.res_id[0]
+                if (new_chain_id, res_id) in processed_residues:
+                    continue
 
                 if not whole_fab:
-                    if chain_id == 'H' and auth_res_num > Hcrop:
+                    if new_chain_id == "H" and res_id > Hcrop:
                         continue
-                    elif chain_id == 'L' and auth_res_num > Lcrop:
+                    elif new_chain_id == "L" and res_id > Lcrop:
                         continue
 
                 for cdr, (start, end) in curr_ranges.items():
-                    # Only process CDRs matching current chain
-                    if start <= auth_res_num <= end:
-                        # Convert to absolute residue number and store
-                        cdr_residues[cdr].append(residue_counter)
+                    if start <= res_id <= end:
+                        cdr_residues[cdr].append(res_id)
 
-                    # Assign the residue a new residue number
-                    residue.res_id = np.full(len(residue), residue_counter)
+                hl_structure.extend(residue)
+                processed_residues.add((new_chain_id, res_id))
+        else:  # Target chain
+            t_structure.extend(atoms)
 
-                    # Remove insertion codes
-                    residue.ins_code = np.full(len(residue), '')
+    return array(hl_structure), array(t_structure), cdr_residues
 
-                    atom_list += residue
-
-                    residue_counter += 1
-
-    return array(atom_list), cdr_residues
 
 def main():
     """
     Main function to run the conversion process
     """
-
     # Parse command line arguments
     args = parse_args()
-    target_chains = args.target.split(',') if args.target else []
+    target_chains = args.target.split(",") if args.target else []
 
-    # Generate output path if not specified
-    output_path = args.output or args.inpdb.replace('.pdb', '_HLT.pdb')
+    output_base = args.output or args.inpdb.replace(".pdb", "")
+    output_hl = f"{output_base}_HL.pdb"
+    output_t = f"{output_base}_T.pdb"
 
-    # Convert structure to HLT format
-    hlt_structure, cdr_residues = convert_to_hlt(
+    hl_structure, t_structure, cdr_residues = convert_to_hlt(
         args.inpdb,
         args.heavy,
         args.light,
         target_chains,
         args.whole_fab,
         args.Hcrop,
-        args.Lcrop
+        args.Lcrop,
     )
 
-    # Create new PDB file with converted structure
-    pdb_file = PDBFile()
-    pdb_file.set_structure(hlt_structure)
-
-    # Write structure and CDR annotations
-    with open(output_path, 'w') as f:
-        pdb_file.write(f)
-        # Add CDR annotations as REMARK statements
-        # Format: REMARK PDBinfo-LABEL: <residue_number> <CDR_name>
+    # Write HL structure
+    pdb_file_hl = PDBFile()
+    pdb_file_hl.set_structure(hl_structure)
+    with open(output_hl, "w") as f:
+        pdb_file_hl.write(f)
         for cdr in sorted(cdr_residues.keys()):
             for res_num in sorted(cdr_residues[cdr]):
                 f.write(f"REMARK PDBinfo-LABEL: {res_num:4d} {cdr}\n")
 
-if __name__ == '__main__':
+    # Write T structure
+    if len(t_structure) > 0:
+        pdb_file_t = PDBFile()
+        pdb_file_t.set_structure(t_structure)
+        with open(output_t, "w") as f:
+            pdb_file_t.write(f)
+
+    print(f"HL chains saved to: {output_hl}")
+    if len(t_structure) > 0:
+        print(f"T chain saved to: {output_t}")
+    else:
+        print("No T chain found in the structure.")
+
+
+if __name__ == "__main__":
     main()

@@ -45,3 +45,6 @@ optional = true
 pytest = "^8.0.0"
 pandas = "*"
 
+[tool.ruff.lint]
+ignore = ["F821", "E741", "F401", "F405", "F403", "F841", "E731"] 
+

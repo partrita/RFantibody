@@ -9,49 +9,48 @@ from rfantibody.rf2.modules.parsers import parse_pdblines, get_cdr_masks_from_re
 
 
 def range1(n):
-    return range(1, n+1)
+    return range(1, n + 1)
 
 
 @dataclass
-class Pose():
+class Pose:
+    atoms: np.ndarray  # [L, 3, 3] tensor of backbone atom coordinates
+    seq: np.ndarray  # [L] tensor of amino acid residues in 3 letter format
+    chain: np.ndarray  # [L] tensor of chain identifiers
 
-    atoms: np.ndarray # [L, 3, 3] tensor of backbone atom coordinates
-    seq: np.ndarray # [L] tensor of amino acid residues in 3 letter format
-    chain: np.ndarray # [L] tensor of chain identifiers
-
-    cdr_dict: dict[str, list[int]] # dictionary of CDR indices, with indices starting at 1
-
+    cdr_dict: dict[
+        str, list[int]
+    ]  # dictionary of CDR indices, with indices starting at 1
 
     @classmethod
-    def from_pdb(cls, pdbfile: str) -> 'Pose':
-        '''
+    def from_pdb(cls, pdbfile: str) -> "Pose":
+        """
         Load a pdb file into a Pose object
 
         Args:
             pdbfile:
                 The path to the pdb file to load
-        '''
-        
-        with open(pdbfile, 'r') as f:
+        """
+
+        with open(pdbfile, "r") as f:
             pdblines = f.readlines()
 
         return cls.from_pdblines(pdblines)
 
-
     @classmethod
-    def from_pdblines(cls, pdblines: List[str]) -> 'Pose':
-        '''
+    def from_pdblines(cls, pdblines: List[str]) -> "Pose":
+        """
         Create a Pose object from a list of pdb lines
 
         Args:
             pdblines:
                 A list of pdb lines to parse
-        '''
-        
+        """
+
         seq, pdb_idx, xyz = parse_pdblines(pdblines)
 
         # Parse to a backbone xyz tensor
-        bb_xyz = xyz[:, :4, :] # [L, 4, 3]
+        bb_xyz = xyz[:, :4, :]  # [L, 4, 3]
 
         # Convert the sequence from numbers to 3 letter amino acids
         seq = np.array([num2aa[i] for i in seq])
@@ -63,12 +62,12 @@ class Pose():
 
         # Now turn the cdr_masks into a dict of cdr indices
         cdr_dict = {
-            'H1': [],
-            'H2': [],
-            'H3': [],
-            'L1': [],
-            'L2': [],
-            'L3': [],
+            "H1": [],
+            "H2": [],
+            "H3": [],
+            "L1": [],
+            "L2": [],
+            "L3": [],
         }
 
         for cdr, mask in cdr_masks.items():
@@ -80,7 +79,6 @@ class Pose():
             chain=chains,
             cdr_dict=cdr_dict,
         )
-
 
     def assert_HLT(self) -> bool:
         """
@@ -109,31 +107,30 @@ class Pose():
         # Check 1
         if np.unique(unique_chains).size != unique_chains.size:
             return False
-        
-        # Check 2
-        if 'T' not in unique_chains:
-            return False
-        
-        if 'H' in unique_chains and 'L' in unique_chains:
-            return unique_chains == np.array(['H', 'L', 'T'])
-        
-        if 'H' in unique_chains and 'L' not in unique_chains:
-            return unique_chains == np.array(['H', 'T'])
-        
-        if 'H' not in unique_chains and 'L' in unique_chains:
-            return unique_chains == np.array(['L', 'T'])
-        
-        # If we get here something has gone wrong
-        raise Exception(f'Unsupported combination of chains: {unique_chains} provided')
 
+        # Check 2
+        if "T" not in unique_chains:
+            return False
+
+        if "H" in unique_chains and "L" in unique_chains:
+            return unique_chains == np.array(["H", "L", "T"])
+
+        if "H" in unique_chains and "L" not in unique_chains:
+            return unique_chains == np.array(["H", "T"])
+
+        if "H" not in unique_chains and "L" in unique_chains:
+            return unique_chains == np.array(["L", "T"])
+
+        # If we get here something has gone wrong
+        raise Exception(f"Unsupported combination of chains: {unique_chains} provided")
 
     def mutate_residue(
-            self,
-            chain: str,
-            residx: int,
-            newres: str,
+        self,
+        chain: str,
+        residx: int,
+        newres: str,
     ) -> None:
-        '''
+        """
         Mutate a residue in a pose
 
         Args:
@@ -145,40 +142,40 @@ class Pose():
 
             newres:
                 The new 3 letter residue name to assign to the specified residue
-        '''
-        
+        """
+
         # Assert that the residue index is within the bounds of the chain
-        assert self.chain[residx] == chain, 'Residue index is not in the specified chain'
+        assert self.chain[residx] == chain, (
+            "Residue index is not in the specified chain"
+        )
 
         # Assert that the new residue is a valid amino acid
-        assert newres in num2aa, 'Invalid amino acid'
+        assert newres in num2aa, "Invalid amino acid"
 
         # Assign the new residue to the sequence
         self.seq[residx] = newres
 
-
     def dump_pdb(self, pdbfile: str) -> None:
-        '''
+        """
         Dump a Pose object to a pdb file
 
         Args:
             pdbfile:
                 The path to the pdb file to write
-        '''
-        
+        """
+
         pdblines = self.to_pdblines()
 
-        with open(pdbfile, 'w') as f:
+        with open(pdbfile, "w") as f:
             f.writelines(pdblines)
 
-
     def to_pdblines(self) -> List[str]:
-        '''
+        """
         Convert a pose to a list of pdb lines
 
         Returns:
             A list of pdb lines representing the pose
-        '''
+        """
 
         # Convert the sequence back to numbers
         seq = np.array([aa2num[i] for i in self.seq])
@@ -192,4 +189,3 @@ class Pose():
         )
 
         return pdblines
-

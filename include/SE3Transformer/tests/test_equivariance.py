@@ -44,13 +44,13 @@ def _get_outputs(model, R):
         feats1 = feats1.cuda()
         R = R.cuda()
         coords = coords.cuda()
-        graph = graph.to('cuda')
+        graph = graph.to("cuda")
         model.cuda()
 
     graph1 = assign_relative_pos(graph, coords)
-    out1 = model(graph1, {'0': feats0, '1': feats1}, {})
+    out1 = model(graph1, {"0": feats0, "1": feats1}, {})
     graph2 = assign_relative_pos(graph, coords @ R)
-    out2 = model(graph2, {'0': feats0, '1': feats1 @ R}, {})
+    out2 = model(graph2, {"0": feats0, "1": feats1 @ R}, {})
 
     return out1, out2
 
@@ -64,8 +64,9 @@ def _get_model(**kwargs):
         fiber_edge=Fiber({}),
         num_heads=8,
         channels_div=2,
-        **kwargs
+        **kwargs,
     )
+
 
 @pytest.mark.skip
 def test_equivariance():
@@ -75,29 +76,35 @@ def test_equivariance():
         R = R.cuda()
     out1, out2 = _get_outputs(model, R)
 
-    assert torch.allclose(out2['0'], out1['0'], atol=TOL), \
-        f'type-0 features should be invariant {get_max_diff(out1["0"], out2["0"])}'
-    assert torch.allclose(out2['1'], (out1['1'] @ R), atol=TOL), \
-        f'type-1 features should be equivariant {get_max_diff(out1["1"] @ R, out2["1"])}'
+    assert torch.allclose(out2["0"], out1["0"], atol=TOL), (
+        f"type-0 features should be invariant {get_max_diff(out1['0'], out2['0'])}"
+    )
+    assert torch.allclose(out2["1"], (out1["1"] @ R), atol=TOL), (
+        f"type-1 features should be equivariant {get_max_diff(out1['1'] @ R, out2['1'])}"
+    )
+
 
 @pytest.mark.skip
 def test_equivariance_pooled():
-    model = _get_model(pooling='avg', return_type=1)
+    model = _get_model(pooling="avg", return_type=1)
     R = rot(*torch.rand(3))
     if torch.cuda.is_available():
         R = R.cuda()
     out1, out2 = _get_outputs(model, R)
 
-    assert torch.allclose(out2, (out1 @ R), atol=TOL), \
-        f'type-1 features should be equivariant {get_max_diff(out1 @ R, out2)}'
+    assert torch.allclose(out2, (out1 @ R), atol=TOL), (
+        f"type-1 features should be equivariant {get_max_diff(out1 @ R, out2)}"
+    )
+
 
 @pytest.mark.skip
 def test_invariance_pooled():
-    model = _get_model(pooling='avg', return_type=0)
+    model = _get_model(pooling="avg", return_type=0)
     R = rot(*torch.rand(3))
     if torch.cuda.is_available():
         R = R.cuda()
     out1, out2 = _get_outputs(model, R)
 
-    assert torch.allclose(out2, out1, atol=TOL), \
-        f'type-0 features should be invariant {get_max_diff(out1, out2)}'
+    assert torch.allclose(out2, out1, atol=TOL), (
+        f"type-0 features should be invariant {get_max_diff(out1, out2)}"
+    )

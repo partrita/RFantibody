@@ -304,7 +304,7 @@ def matrix_to_euler_angles(matrix: torch.Tensor, convention: str) -> torch.Tenso
 
 
 def random_quaternions(
-    n: int, dtype: Optional[torch.dtype] = None, device = None
+    n: int, dtype: Optional[torch.dtype] = None, device=None
 ) -> torch.Tensor:
     """
     Generate random quaternions representing rotations,
@@ -329,7 +329,7 @@ def random_quaternions(
 
 
 def random_rotations(
-    n: int, dtype: Optional[torch.dtype] = None, device = None
+    n: int, dtype: Optional[torch.dtype] = None, device=None
 ) -> torch.Tensor:
     """
     Generate random rotations as 3x3 rotation matrices.
@@ -347,9 +347,7 @@ def random_rotations(
     return quaternion_to_matrix(quaternions)
 
 
-def random_rotation(
-    dtype: Optional[torch.dtype] = None, device = None
-) -> torch.Tensor:
+def random_rotation(dtype: Optional[torch.dtype] = None, device=None) -> torch.Tensor:
     """
     Generate a single random 3x3 rotation matrix.
 
