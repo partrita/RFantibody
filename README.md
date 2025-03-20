@@ -1,18 +1,11 @@
 # RFantibody
 
-Todo list
-
-- [x] Fix minor typo of example code to working.
-- [ ] Bash script reorganize to single file.
-- [ ] Change package manager `poetry` to `uv`.
-- [x] Refactoring the code.
-- [ ] Deploy dockerfile from github action.
-
 ## Structure-Based _de novo_ Antibody Design
 
 ![banner](https://www.bakerlab.org/wp-content/uploads/2025/02/RFdiffusion-antibody-bound-to-Cdiff-ToxinB-BY-Ian-C-Haydon-University-of-Washington-1024x576.jpg)
 
 # Description
+
 RFantibody is a pipeline for the structure-based design of _de novo_ antibodies and nanobodies. RFantibody consists of three separate methods:
 - Protein backbone design with an antibody-fintuned version of [RFdiffusion](https://www.nature.com/articles/s41586-023-06415-8)
 - Protein sequence design with [ProteinMPNN](https://www.science.org/doi/10.1126/science.add2187)
