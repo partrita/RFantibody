@@ -80,6 +80,7 @@ After running this command, you will need to restart your terminal session for t
 ### Build docker image
 
 Navigate to the directory where RFantibody is downloaded. Then run the following command to build the Docker image for RFantibody:
+
 ```bash
 docker build -t rfantibody .
 ```
@@ -87,23 +88,31 @@ docker build -t rfantibody .
 ### Start the Docker image
 
 Run the following command to start the docker container based on the image you just built:
+
 ```bash
 docker run --name rfantibody --gpus all -v .:/home --memory 10g -it rfantibody
 ```
 This will put you into the RFantibody container at the /home directory which mirrors the directory that you ran the last command from.
 
-
-
 ## Setup the Python Environment
 
 From the RFantibody container run the following to setup the python environment:
+
 ```bash
 bash /home/include/setup.sh
 ```
+
 This does the following:
 - Download [Deep Graph Library](https://www.dgl.ai) in preparation of building the python environment
 - Use [Python Poetry](https://python-poetry.org) to build the Python environment
 - Build the [USalign](https://github.com/pylelab/USalign) executable
+
+
+## 중지된 컨테이너 다시 시작
+
+```bash
+docker start -i rfantibody
+```
 
 ## Production Docker Image
 
