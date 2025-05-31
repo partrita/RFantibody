@@ -13,7 +13,7 @@ RUN python3 -m venv /opt/venv
 # Enable venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-RUN pip install poetry
+RUN pip install uv
 
 # Set the working directory to the user's home directory
 WORKDIR /home
