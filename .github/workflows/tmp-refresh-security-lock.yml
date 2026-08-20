@@ -1,8 +1,8 @@
 name: refresh security lock
 on:
-  push:
+  pull_request:
     branches:
-      - security/pytorch-dgl-jinja
+      - main
     paths:
       - pyproject.toml
 permissions:
