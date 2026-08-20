@@ -19,21 +19,20 @@ priority = "primary"
 
 [[tool.poetry.source]]
 name = "pytorch"
-url = "https://download.pytorch.org/whl/cu118"
+url = "https://download.pytorch.org/whl/cu128"
 priority = "explicit"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11.dev0"
-torch = { version="2.3.*", source="pytorch" }
-torchaudio = "*"
-torchvision = "*"
+torch = { version="2.10.0", source="pytorch" }
+torchaudio = { version="2.10.0", source="pytorch" }
+torchvision = { version="0.25.0", source="pytorch" }
 torch-utils = "*"
 numpy = "1.*"
-cuda-python = "11.8"
+cuda-python = "12.8.*"
 hydra-core = "*"
 icecream = "*"
 opt-einsum = "*"
-dgl = { file = "./include/dgl/dgl-2.4.0+cu118-cp310-cp310-manylinux1_x86_64.whl" }
 e3nn = "*"
 pyrsistent = "*"
 biotite = "1.1.*"
